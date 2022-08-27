@@ -19,7 +19,9 @@ gem 'turbolinks', '~> 5'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
+gem 'bcrypt', '~> 3.1.7'
+# JWT handling
+gem 'jwt', '~> 2.5.0'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -28,6 +30,8 @@ gem 'turbolinks', '~> 5'
 gem 'bootsnap', '>= 1.4.2', require: false
 
 gem 'jsonapi-serializer', '~> 2.2'
+# Allow usage of .env files
+gem 'dotenv-rails', '~> 2.1'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -45,6 +49,9 @@ group :development, :test do
   gem 'rubocop-rails', '~> 2.11'
   gem 'rubocop-rake', '~> 0.6'
   gem 'rubocop-rspec', '~> 2.4'
+  # Clean model documentation
+  gem 'annotate', '~> 3.0'
+
 end
 
 group :development do
