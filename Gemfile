@@ -51,7 +51,6 @@ group :development, :test do
   gem 'rubocop-rspec', '~> 2.4'
   # Clean model documentation
   gem 'annotate', '~> 3.0'
-
 end
 
 group :development do
