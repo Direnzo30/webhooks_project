@@ -2,37 +2,31 @@
 
 # Exposes API for interacting with Projects.
 class ProjectsController < ApplicationController
+  before_action :authenticate_user!
   before_action :find_organization
   before_action :find_project, only: %i[show update destroy]
 
   def index
-    render json: ProjectSerializer.new(@organization.projects).serializable_hash
+    @projects = Projects::CrudService.index(@organization)
+    render_response(@projects, ProjectSerializer)
   end
 
   def create
-    @project = @organization.projects.build(project_params)
-
-    if @project.save
-      render json: ProjectSerializer.new(@project).serializable_hash
-    else
-      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
-    end
+    @project = Projects::CrudService.create(@organization, project_params)
+    render_response(@project, ProjectSerializer)
   end
 
   def show
-    render json: ProjectSerializer.new(@project).serializable_hash
+    render_response(@project, ProjectSerializer)
   end
 
   def update
-    if @project.update(project_params)
-      render json: ProjectSerializer.new(@project).serializable_hash
-    else
-      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
-    end
+    @project = Projects::CrudService.update(@project, project_params)
+    render_response(@project, ProjectSerializer)
   end
 
   def destroy
-    @project.destroy
+    Projects::CrudService.destroy(@project)
     head :ok
   end
 

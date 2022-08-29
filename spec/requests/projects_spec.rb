@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ProjectsController, type: :controller do
+RSpec.describe 'Projects', type: :request do
   describe 'GET #index' do
     let!(:organization1) { create(:organization) }
     let!(:organization2) { create(:organization) }
@@ -24,7 +24,7 @@ RSpec.describe ProjectsController, type: :controller do
     end
 
     it 'returns all projects for organization' do
-      get :index, params: { organization_id: organization1.id }
+      authenticated_get route: organization_projects_path(organization_id: organization1.id)
 
       expect(response).to be_ok
       expect(json_response).to eq(expected_response)
@@ -52,9 +52,10 @@ RSpec.describe ProjectsController, type: :controller do
     context 'when successfully created' do
       it 'returns project json' do
         freeze_time do
-          post :create, params: { organization_id: organization.id, name: 'Test Name' }
+          authenticated_post route: organization_projects_path(organization_id: organization.id),
+                             params: { name: 'Test Name' }
 
-          expect(response).to be_ok
+          expect(response).to have_http_status(:ok)
           expect(json_response).to eq(expected_response)
         end
       end
@@ -62,10 +63,10 @@ RSpec.describe ProjectsController, type: :controller do
 
     context 'when error occurred' do
       it 'returns errors' do
-        post :create, params: { organization_id: organization.id }
+        authenticated_post route: organization_projects_path(organization_id: organization.id)
 
         expect(response.status).to eq(422)
-        expect(json_response).to eq(errors: ["Name can't be blank"])
+        expect(json_response).to eq(errors: ["Name can't be blank"].to_s)
       end
     end
   end
@@ -73,7 +74,6 @@ RSpec.describe ProjectsController, type: :controller do
   describe 'GET #show' do
     context 'when project exists' do
       let(:project) { create(:project) }
-      let(:params) { { organization_id: project.organization_id, id: project.id } }
       let(:expected_response) do
         {
           data: {
@@ -90,7 +90,7 @@ RSpec.describe ProjectsController, type: :controller do
       end
 
       it 'returns project json' do
-        get :show, params: params
+        authenticated_get route: organization_project_path(organization_id: project.organization_id, id: project.id)
 
         expect(response).to be_ok
         expect(json_response).to eq(expected_response)
@@ -101,9 +101,9 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:organization) { create(:organization) }
 
       it 'returns 404' do
-        get :show, params: { organization_id: organization.id, id: 1 }
+        authenticated_get route: organization_project_path(organization_id: organization.id, id: 1)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -115,9 +115,9 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:project2) { create(:project, organization: organization2) }
 
       it 'returns 404' do
-        get :show, params: { organization_id: organization1.id, id: project2.id }
+        authenticated_get route: organization_project_path(organization_id: organization1.id, id: project2.id)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -130,8 +130,6 @@ RSpec.describe ProjectsController, type: :controller do
       context 'when successfully updated' do
         let(:params) do
           {
-            organization_id: project.organization_id,
-            id: project.id,
             name: 'Random Test Name'
           }
         end
@@ -152,7 +150,9 @@ RSpec.describe ProjectsController, type: :controller do
 
         it 'returns project json' do
           freeze_time do
-            patch :update, params: params
+            authenticated_patch route: organization_project_path(organization_id: project.organization_id,
+                                                                 id: project.id),
+                                params: params
 
             expect(response).to be_ok
             expect(json_response).to eq(expected_response)
@@ -162,14 +162,12 @@ RSpec.describe ProjectsController, type: :controller do
 
       context 'when error occurred' do
         it 'returns errors' do
-          patch :update, params: {
-            organization_id: project.organization_id,
-            id: project.id,
-            name: ''
-          }
+          authenticated_patch route: organization_project_path(organization_id: project.organization_id,
+                                                               id: project.id),
+                              params: { name: '' }
 
-          expect(response.status).to eq(422)
-          expect(json_response).to eq(errors: ["Name can't be blank"])
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(json_response).to eq(errors: ["Name can't be blank"].to_s)
         end
       end
     end
@@ -178,13 +176,10 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:organization) { create(:organization) }
 
       it 'returns 404' do
-        patch :update, params: {
-          organization_id: organization.id,
-          id: 1,
-          name: 'Test'
-        }
+        authenticated_patch route: organization_project_path(organization_id: organization.id, id: 1),
+                            params: { name: 'Test' }
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -196,13 +191,10 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:project2) { create(:project, organization: organization2) }
 
       it 'returns 404' do
-        patch :update, params: {
-          organization_id: organization1.id,
-          id: project2.id,
-          name: 'Test'
-        }
+        authenticated_patch route: organization_project_path(organization_id: organization1.id, id: project2.id),
+                            params: { name: 'Test' }
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -213,7 +205,7 @@ RSpec.describe ProjectsController, type: :controller do
       let(:project) { create(:project) }
 
       it 'returns 200' do
-        delete :destroy, params: { organization_id: project.organization_id, id: project.id }
+        authenticated_delete route: organization_project_path(organization_id: project.organization_id, id: project.id)
         expect(response).to be_ok
       end
     end
@@ -222,7 +214,7 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:organization) { create(:organization) }
 
       it 'returns 404' do
-        delete :destroy, params: { organization_id: organization.id, id: 1 }
+        authenticated_delete route: organization_project_path(organization_id: organization.id, id: 1)
 
         expect(response).to be_not_found
         expect(json_response).to eq(error: 'Not Found')
@@ -236,7 +228,7 @@ RSpec.describe ProjectsController, type: :controller do
       let!(:project2) { create(:project, organization: organization2) }
 
       it 'returns 404' do
-        delete :destroy, params: { organization_id: organization1.id, id: project2.id }
+        authenticated_delete route: organization_project_path(organization_id: organization1.id, id: project2.id)
 
         expect(response).to be_not_found
         expect(json_response).to eq(error: 'Not Found')
