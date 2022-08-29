@@ -64,4 +64,6 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
   # Generates the methods documentation
   gem 'yard', '~> 0.9.28'
+  # Generates documentation for concerns
+  gem 'yard-activesupport-concern', '~> 0.0.1'
 end
