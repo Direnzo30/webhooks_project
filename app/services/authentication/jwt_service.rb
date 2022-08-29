@@ -7,6 +7,13 @@ module Authentication
     EXPIRATION_TIME = 24.hours
     ENCODE_ALG = 'HS256'
 
+    #
+    # Creates the JWT to be used as Authorization header for the api requests
+    #
+    # @param [Integer] user_id - The user's id to be encoded for the JWT>
+    #
+    # @return [String] The encoded JWT
+    #
     def self.encode(user_id)
       iat = Time.now.to_i
       payload = {
@@ -19,6 +26,13 @@ module Authentication
       raise InvalidTokenException
     end
 
+    #
+    # Decodes a JWT and obtains the payload
+    #
+    # @param [String] token - The JWT to be decoded
+    #
+    # @return [Hash] The payload associated to the JWT
+    #
     def self.decode(token)
       JWT.decode(token, JWT_KEY, true, { algorithm: ENCODE_ALG }).first
     rescue StandardError
