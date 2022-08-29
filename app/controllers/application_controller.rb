@@ -2,11 +2,7 @@
 
 # Base class for all controllers
 class ApplicationController < ActionController::Base
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found
-
-  private
-
-  def not_found
-    render json: { error: 'Not Found' }, status: :not_found
-  end
+  protect_from_forgery with: :null_session
+  include Authenticable
+  include Renderable
 end

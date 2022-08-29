@@ -5,8 +5,8 @@ module Renderable
   extend ActiveSupport::Concern
 
   included do
-    rescue_from ActiveRecord::RecordNotFound, with: :not_found
     rescue_from(StandardError) { |exception| manage_standand_error(exception) }
+    rescue_from ActiveRecord::RecordNotFound, with: :not_found
     rescue_from(BaseException) { |exception| manage_base_exception(exception) }
 
     private
