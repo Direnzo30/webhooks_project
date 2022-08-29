@@ -2,37 +2,31 @@
 
 # Exposes API for interacting with Tasks.
 class TasksController < ApplicationController
+  before_action :authenticate_user!
   before_action :find_project
   before_action :find_task, only: %i[show update destroy]
 
   def index
-    render json: TaskSerializer.new(@project.tasks).serializable_hash
+    @tasks = Tasks::CrudService.index(@project)
+    render_response(@tasks, TaskSerializer)
   end
 
   def create
-    @task = @project.tasks.build(task_params)
-
-    if @task.save
-      render json: TaskSerializer.new(@task).serializable_hash
-    else
-      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-    end
+    @task = Tasks::CrudService.create(@project, task_params)
+    render_response(@task, TaskSerializer)
   end
 
   def show
-    render json: TaskSerializer.new(@task).serializable_hash
+    render_response(@task, TaskSerializer)
   end
 
   def update
-    if @task.update(task_params)
-      render json: TaskSerializer.new(@task).serializable_hash
-    else
-      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-    end
+    @task = Tasks::CrudService.update(@task, task_params)
+    render_response(@task, TaskSerializer)
   end
 
   def destroy
-    @task.destroy
+    Tasks::CrudService.destroy(@task)
     head :ok
   end
 
