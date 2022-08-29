@@ -12,6 +12,7 @@
 - rack-cors: For handling the cross origin requests
 - yard: For generating the app documentation
 - yard-activesupport-concern: Plugin for adding documentation to the concerns
+- jwt: handles the jwt encoding/deconding
 
 # Generating DOC
 
