@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe TasksController, type: :controller do
+RSpec.describe 'Tasks', type: :request do
   describe 'GET #index' do
     let!(:project1) { create(:project) }
     let!(:project2) { create(:project) }
@@ -25,7 +25,7 @@ RSpec.describe TasksController, type: :controller do
     end
 
     it 'returns all tasks for project' do
-      get :index, params: { project_id: project1.id }
+      authenticated_get route: project_tasks_path(project_id: project1.id)
 
       expect(response).to be_ok
       expect(json_response).to eq(expected_response)
@@ -38,7 +38,7 @@ RSpec.describe TasksController, type: :controller do
 
     context 'when successfully created' do
       let(:params) do
-        { project_id: project.id, name: 'Test Name', description: 'Test Desc' }
+        { name: 'Test Name', description: 'Test Desc' }
       end
       let(:expected_response) do
         {
@@ -58,7 +58,7 @@ RSpec.describe TasksController, type: :controller do
 
       it 'returns task json' do
         freeze_time do
-          post :create, params: params
+          authenticated_post route: project_tasks_path(project_id: project.id), params: params
 
           expect(response).to be_ok
           expect(json_response).to eq(expected_response)
@@ -68,11 +68,11 @@ RSpec.describe TasksController, type: :controller do
 
     context 'when error occurred' do
       it 'returns errors' do
-        post :create, params: { project_id: project.id }
+        authenticated_post route: project_tasks_path(project_id: project.id), params: {}
 
-        expect(response.status).to eq(422)
+        expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response).to eq(
-          errors: ["Name can't be blank", "Description can't be blank"]
+          errors: ["Name can't be blank", "Description can't be blank"].to_s
         )
       end
     end
@@ -98,7 +98,7 @@ RSpec.describe TasksController, type: :controller do
       end
 
       it 'when returns task json' do
-        get :show, params: { project_id: task.project_id, id: task.id }
+        authenticated_get route: project_task_path(project_id: task.project_id, id: task.id)
 
         expect(response).to be_ok
         expect(json_response).to eq(expected_response)
@@ -109,9 +109,9 @@ RSpec.describe TasksController, type: :controller do
       let!(:project) { create(:project) }
 
       it 'returns 404' do
-        get :show, params: { project_id: project.id, id: 1 }
+        authenticated_get route: project_task_path(project_id: project.id, id: 1)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -123,9 +123,9 @@ RSpec.describe TasksController, type: :controller do
       let!(:task2) { create(:task, project: project2) }
 
       it 'returns 404' do
-        get :show, params: { project_id: project1.id, id: project2.id }
+        authenticated_get route: project_task_path(project_id: project1.id, id: task2.id)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -138,8 +138,6 @@ RSpec.describe TasksController, type: :controller do
       context 'when successfully updated' do
         let(:params) do
           {
-            project_id: task.project_id,
-            id: task.id,
             name: 'Random Test Name'
           }
         end
@@ -161,7 +159,7 @@ RSpec.describe TasksController, type: :controller do
 
         it 'returns task json' do
           freeze_time do
-            patch :update, params: params
+            authenticated_patch route: project_task_path(project_id: task.project_id, id: task.id), params: params
 
             expect(response).to be_ok
             expect(json_response).to eq(expected_response)
@@ -172,17 +170,15 @@ RSpec.describe TasksController, type: :controller do
       context 'when error occurred' do
         let(:params) do
           {
-            project_id: task.project_id,
-            id: task.id,
             name: ''
           }
         end
 
         it 'returns errors' do
-          patch :update, params: params
+          authenticated_patch route: project_task_path(project_id: task.project_id, id: task.id), params: params
 
-          expect(response.status).to eq(422)
-          expect(json_response).to eq(errors: ["Name can't be blank"])
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(json_response).to eq(errors: ["Name can't be blank"].to_s)
         end
       end
     end
@@ -191,16 +187,14 @@ RSpec.describe TasksController, type: :controller do
       let!(:project) { create(:project) }
       let(:params) do
         {
-          project_id: project.id,
-          id: 1,
           name: 'Test'
         }
       end
 
       it 'returns 404' do
-        patch :update, params: params
+        authenticated_patch route: project_task_path(project_id: project.id, id: 1), params: params
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -212,16 +206,14 @@ RSpec.describe TasksController, type: :controller do
       let!(:task2) { create(:task, project: project2) }
       let(:params) do
         {
-          project_id: project1.id,
-          id: task2.id,
           name: 'Test'
         }
       end
 
       it 'returns 404' do
-        patch :update, params: params
+        authenticated_patch route: project_task_path(project_id: project1.id, id: task2.id), params: params
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -232,7 +224,7 @@ RSpec.describe TasksController, type: :controller do
       let(:task) { create(:task) }
 
       it 'returns 200' do
-        delete :destroy, params: { project_id: task.project_id, id: task.id }
+        authenticated_delete route: project_task_path(project_id: task.project_id, id: task.id)
         expect(response).to be_ok
       end
     end
@@ -241,9 +233,9 @@ RSpec.describe TasksController, type: :controller do
       let!(:project) { create(:project) }
 
       it 'returns 404' do
-        delete :destroy, params: { project_id: project.id, id: 1 }
+        authenticated_delete route: project_task_path(project_id: project.id, id: 1)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
@@ -255,9 +247,9 @@ RSpec.describe TasksController, type: :controller do
       let!(:task2) { create(:task, project: project2) }
 
       it 'returns 404' do
-        delete :destroy, params: { project_id: project1.id, id: task2.id }
+        authenticated_delete route: project_task_path(project_id: project1.id, id: task2.id)
 
-        expect(response).to be_not_found
+        expect(response).to have_http_status(:not_found)
         expect(json_response).to eq(error: 'Not Found')
       end
     end
