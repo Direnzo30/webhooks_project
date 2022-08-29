@@ -32,6 +32,8 @@ gem 'bootsnap', '>= 1.4.2', require: false
 gem 'jsonapi-serializer', '~> 2.2'
 # Allow usage of .env files
 gem 'dotenv-rails', '~> 2.1'
+# Allow cross origin requests
+gem 'rack-cors', '~> 1.1'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
