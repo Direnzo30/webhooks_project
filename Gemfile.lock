@@ -271,9 +271,12 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
+    webrick (1.7.0)
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    yard (0.9.28)
+      webrick (~> 1.7.0)
     zeitwerk (2.5.4)
 
 PLATFORMS
@@ -309,6 +312,7 @@ DEPENDENCIES
   spring-watcher-listen (~> 2.0.0)
   turbolinks (~> 5)
   web-console (>= 3.3.0)
+  yard (~> 0.9.28)
 
 RUBY VERSION
    ruby 2.7.6p219
